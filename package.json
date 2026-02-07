@@ -1,0 +1,18 @@
+{
+  "name": "edutarget",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "EduTarget - Ta'lim markazlari uchun maqsadli marketing agentligi",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "astro": "^5.17.1",
+    "gsap": "^3.14.2",
+    "tailwindcss": "^4.1.18"
+  }
+}

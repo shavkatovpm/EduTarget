@@ -1,0 +1,63 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  image = '/favicon.svg',
+  type = 'website',
+  noindex = false
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const imageURL = new URL(image, Astro.site);
+
+const schemaOrg = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  '@id': Astro.site?.toString(),
+  name: 'EduTarget',
+  description: "Ta'lim markazlari uchun maqsadli marketing agentligi",
+  url: Astro.site?.toString(),
+  logo: new URL('/favicon.svg', Astro.site).toString(),
+  address: {
+    '@type': 'PostalAddress',
+    addressCountry: 'UZ',
+    addressLocality: 'Tashkent'
+  },
+  serviceType: ['Instagram Advertising', 'Telegram Advertising', 'Facebook Advertising', 'Content Strategy', 'Landing Page Development']
+};
+---
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<!-- Canonical URL -->
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={imageURL} />
+<meta property="og:locale" content="uz_UZ" />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={canonicalURL} />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={imageURL} />
+
+<!-- Schema.org -->
+<script type="application/ld+json" set:html={JSON.stringify(schemaOrg)} />

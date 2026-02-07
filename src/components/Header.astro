@@ -1,0 +1,215 @@
+---
+const navigation = [
+  { name: 'Asosiy', href: '/' },
+  { name: 'Xizmatlar', href: '/#xizmatlar' },
+  { name: 'Jarayon', href: '/#jarayon' },
+  { name: 'Aloqa', href: '/aloqa' },
+];
+
+const mobileCards = [
+  {
+    label: 'Xizmatlar',
+    href: '/#xizmatlar',
+    bgColor: '#61c5ff',
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5" />`
+  },
+  {
+    label: 'Aloqa',
+    href: '/aloqa',
+    bgColor: '#4a9fd6',
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />`
+  }
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="sticky top-0 z-50 border-b border-dark/5 bg-white/80 backdrop-blur-lg">
+  <nav class="container-custom">
+    <div class="flex h-16 items-center justify-between md:h-20">
+      <!-- Logo -->
+      <a href="/" class="text-2xl font-bold">
+        <span class="font-black text-accent">Edu</span><span class="text-dark">Target</span>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <div class="hidden items-center gap-1 md:flex">
+        {navigation.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+              currentPath === item.href
+                ? 'text-dark'
+                : 'text-dark/60 hover:bg-dark/5 hover:text-dark'
+            ]}
+          >
+            {item.name}
+          </a>
+        ))}
+      </div>
+
+      <!-- CTA + Mobile menu button -->
+      <div class="flex items-center gap-3">
+        <a
+          href="/aloqa"
+          class="hidden rounded-full bg-accent px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-accent/90 md:inline-flex"
+        >
+          Bepul maslahat
+        </a>
+
+        <!-- Mobile menu button -->
+        <button
+          type="button"
+          class="relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-1.5 rounded-lg border border-dark/10 text-dark transition-colors hover:bg-dark/5 md:hidden"
+          id="mobile-menu-button"
+          aria-expanded="false"
+          aria-label="Toggle menu"
+        >
+          <span class="hamburger-line h-0.5 w-5 bg-current transition-all duration-300"></span>
+          <span class="hamburger-line h-0.5 w-5 bg-current transition-all duration-300"></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- Mobile Card Navigation Overlay -->
+<div id="mobile-nav-overlay" class="pointer-events-none fixed inset-0 z-40 bg-dark/30 opacity-0 backdrop-blur-sm transition-opacity duration-300 md:hidden"></div>
+
+<div id="mobile-card-nav" class="fixed left-4 right-4 top-20 z-40 overflow-hidden rounded-2xl bg-white shadow-2xl md:hidden" style="height: 0px;">
+  <div class="flex flex-col gap-3 p-4" id="mobile-cards-container">
+    {mobileCards.map((card, idx) => (
+      <a
+        href={card.href}
+        class="nav-card flex items-center gap-4 rounded-xl p-4 text-white transition-transform hover:scale-[1.02]"
+        style={`background-color: ${card.bgColor};`}
+        data-card-index={idx}
+      >
+        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" set:html={card.icon} />
+        </div>
+        <div class="flex flex-1 items-center justify-between">
+          <span class="text-lg font-semibold">{card.label}</span>
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+          </svg>
+        </div>
+      </a>
+    ))}
+
+    <!-- Home link at bottom -->
+    <a
+      href="/"
+      class="nav-card mt-2 flex items-center justify-center gap-2 rounded-xl border border-dark/10 bg-white p-4 text-dark transition-colors hover:bg-dark/5"
+      data-card-index="3"
+    >
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+      </svg>
+      <span class="font-medium">Asosiy</span>
+    </a>
+  </div>
+</div>
+
+<style>
+  #mobile-menu-button.open .hamburger-line:first-child {
+    transform: translateY(4px) rotate(45deg);
+  }
+  #mobile-menu-button.open .hamburger-line:last-child {
+    transform: translateY(-4px) rotate(-45deg);
+  }
+  .nav-card {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  #mobile-card-nav.open .nav-card {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+
+  function initMobileMenu() {
+    const button = document.getElementById('mobile-menu-button');
+    const overlay = document.getElementById('mobile-nav-overlay');
+    const cardNav = document.getElementById('mobile-card-nav');
+    const cards = document.querySelectorAll('.nav-card');
+    if (!button || !overlay || !cardNav || !cards.length) return;
+
+    let isOpen = false;
+    let tl: gsap.core.Timeline | null = null;
+
+    const calculateHeight = () => {
+      const cardsContainer = document.getElementById('mobile-cards-container');
+      if (!cardsContainer) return 300;
+      const wasHeight = cardNav.style.height;
+      cardNav.style.height = 'auto';
+      const height = cardsContainer.offsetHeight;
+      cardNav.style.height = wasHeight;
+      return height;
+    };
+
+    const createTimeline = () => {
+      const timeline = gsap.timeline({ paused: true });
+      gsap.set(cardNav, { height: 0, overflow: 'hidden' });
+      gsap.set(cards, { y: 30, opacity: 0 });
+      timeline.to(cardNav, { height: calculateHeight, duration: 0.4, ease: 'power3.out' });
+      timeline.to(cards, { y: 0, opacity: 1, duration: 0.4, ease: 'power3.out', stagger: 0.08 }, '-=0.2');
+      return timeline;
+    };
+
+    tl = createTimeline();
+
+    const toggleMenu = () => {
+      if (!tl) return;
+      if (!isOpen) {
+        isOpen = true;
+        button.classList.add('open');
+        button.setAttribute('aria-expanded', 'true');
+        overlay.classList.remove('pointer-events-none', 'opacity-0');
+        overlay.classList.add('pointer-events-auto', 'opacity-100');
+        cardNav.classList.add('open');
+        tl.play(0);
+      } else {
+        button.classList.remove('open');
+        button.setAttribute('aria-expanded', 'false');
+        overlay.classList.add('opacity-0');
+        overlay.classList.remove('opacity-100');
+        tl.eventCallback('onReverseComplete', () => {
+          isOpen = false;
+          overlay.classList.add('pointer-events-none');
+          overlay.classList.remove('pointer-events-auto');
+          cardNav.classList.remove('open');
+        });
+        tl.reverse();
+      }
+    };
+
+    button.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', () => { if (isOpen) toggleMenu(); });
+    cards.forEach(card => {
+      card.addEventListener('click', () => { if (isOpen) setTimeout(() => toggleMenu(), 100); });
+    });
+
+    const handleResize = () => {
+      if (window.innerWidth >= 768 && isOpen) {
+        gsap.set(cardNav, { height: 0 });
+        gsap.set(cards, { y: 30, opacity: 0 });
+        button.classList.remove('open');
+        button.setAttribute('aria-expanded', 'false');
+        overlay.classList.add('pointer-events-none', 'opacity-0');
+        overlay.classList.remove('pointer-events-auto', 'opacity-100');
+        cardNav.classList.remove('open');
+        isOpen = false;
+        tl = createTimeline();
+      }
+    };
+    window.addEventListener('resize', handleResize);
+  }
+
+  initMobileMenu();
+  document.addEventListener('astro:after-swap', initMobileMenu);
+</script>

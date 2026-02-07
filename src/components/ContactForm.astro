@@ -1,0 +1,219 @@
+---
+const courseTypes = [
+  { value: 'it', label: 'IT / Dasturlash' },
+  { value: 'language', label: 'Chet tili kurslari' },
+  { value: 'kids', label: 'Bolalar kurslari' },
+  { value: 'test-prep', label: 'Test tayyorlov (IELTS, SAT)' },
+  { value: 'other', label: 'Boshqa' }
+];
+---
+
+<form id="contact-form" class="space-y-6">
+  <div class="grid gap-6 sm:grid-cols-2">
+    <!-- Name -->
+    <div>
+      <label for="name" class="mb-2 block text-sm font-medium text-dark">
+        Ismingiz <span class="text-accent">*</span>
+      </label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        required
+        class="w-full rounded-lg border border-dark/15 bg-white px-4 py-3 text-dark placeholder-dark/40 transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+        placeholder="Ismingizni kiriting"
+      />
+    </div>
+
+    <!-- Phone -->
+    <div>
+      <label for="phone" class="mb-2 block text-sm font-medium text-dark">
+        Telefon raqamingiz <span class="text-accent">*</span>
+      </label>
+      <div class="flex">
+        <span class="inline-flex items-center rounded-l-lg border border-r-0 border-dark/15 bg-dark/5 px-4 py-3 text-dark/60">
+          +998
+        </span>
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          required
+          maxlength="12"
+          inputmode="numeric"
+          pattern="[0-9 ]*"
+          class="w-full rounded-r-lg border border-dark/15 bg-white px-4 py-3 text-dark placeholder-dark/40 transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          placeholder="90 123 45 67"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Center Name -->
+  <div>
+    <label for="center-name" class="mb-2 block text-sm font-medium text-dark">
+      Ta'lim markazingiz nomi <span class="text-accent">*</span>
+    </label>
+    <input
+      type="text"
+      id="center-name"
+      name="center-name"
+      required
+      class="w-full rounded-lg border border-dark/15 bg-white px-4 py-3 text-dark placeholder-dark/40 transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+      placeholder="Masalan: IT Academy"
+    />
+  </div>
+
+  <!-- Course Type -->
+  <div>
+    <label for="course-type" class="mb-2 block text-sm font-medium text-dark">
+      Kurs turi <span class="text-accent">*</span>
+    </label>
+    <select
+      id="course-type"
+      name="course-type"
+      required
+      class="w-full rounded-lg border border-dark/15 bg-white px-4 py-3 text-dark transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+    >
+      <option value="" disabled selected>Tanlang...</option>
+      {courseTypes.map((type) => (
+        <option value={type.value}>{type.label}</option>
+      ))}
+    </select>
+  </div>
+
+  <!-- Message -->
+  <div>
+    <label for="message" class="mb-2 block text-sm font-medium text-dark">
+      Xabaringiz <span class="text-accent">*</span>
+    </label>
+    <textarea
+      id="message"
+      name="message"
+      rows="4"
+      required
+      class="w-full resize-none rounded-lg border border-dark/15 bg-white px-4 py-3 text-dark placeholder-dark/40 transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+      placeholder="Ta'lim markazingiz haqida qisqacha yozing"
+    ></textarea>
+  </div>
+
+  <!-- Submit Button -->
+  <button
+    type="submit"
+    class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-accent px-8 text-base font-semibold text-white shadow-lg shadow-accent/25 transition-all hover:bg-accent/90 hover:shadow-xl hover:shadow-accent/30 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+  >
+    <span id="submit-text">Yuborish</span>
+    <svg id="submit-spinner" class="hidden h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  </button>
+</form>
+
+<!-- Toast Messages -->
+<div id="success-message" class="pointer-events-none fixed left-1/2 top-4 z-50 -translate-x-1/2 translate-y-[-100px] opacity-0 transition-all duration-300">
+  <div class="rounded-lg bg-green-600 px-6 py-3 text-white shadow-lg">
+    Xabaringiz yuborildi!
+  </div>
+</div>
+
+<div id="error-message" class="pointer-events-none fixed left-1/2 top-4 z-50 -translate-x-1/2 translate-y-[-100px] opacity-0 transition-all duration-300">
+  <div class="rounded-lg bg-red-600 px-6 py-3 text-white shadow-lg">
+    Xatolik yuz berdi
+  </div>
+</div>
+
+<script>
+  const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL';
+
+  function initContactForm() {
+    const form = document.getElementById('contact-form');
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const submitText = document.getElementById('submit-text');
+    const submitSpinner = document.getElementById('submit-spinner');
+    const successMessage = document.getElementById('success-message');
+    const errorMessage = document.getElementById('error-message');
+
+    if (!form) return;
+
+    if (phoneInput) {
+      phoneInput.addEventListener('keypress', (e) => {
+        if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+          e.preventDefault();
+        }
+      });
+
+      phoneInput.addEventListener('input', (e) => {
+        const target = e.target as HTMLInputElement;
+        let value = target.value.replace(/\D/g, '');
+        if (value.length > 0) {
+          let formatted = '';
+          if (value.length > 0) formatted += value.substring(0, 2);
+          if (value.length > 2) formatted += ' ' + value.substring(2, 5);
+          if (value.length > 5) formatted += ' ' + value.substring(5, 7);
+          if (value.length > 7) formatted += ' ' + value.substring(7, 9);
+          target.value = formatted;
+        }
+      });
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const showToast = (element: HTMLElement | null) => {
+        if (!element) return;
+        element.classList.remove('translate-y-[-100px]', 'opacity-0');
+        element.classList.add('translate-y-0', 'opacity-100');
+        setTimeout(() => {
+          element.classList.remove('translate-y-0', 'opacity-100');
+          element.classList.add('translate-y-[-100px]', 'opacity-0');
+        }, 3000);
+      };
+
+      successMessage?.classList.remove('translate-y-0', 'opacity-100');
+      successMessage?.classList.add('translate-y-[-100px]', 'opacity-0');
+      errorMessage?.classList.remove('translate-y-0', 'opacity-100');
+      errorMessage?.classList.add('translate-y-[-100px]', 'opacity-0');
+
+      submitText?.classList.add('hidden');
+      submitSpinner?.classList.remove('hidden');
+
+      const formData = new FormData(form as HTMLFormElement);
+      const phoneValue = formData.get('phone') as string;
+      const data = {
+        name: formData.get('name'),
+        phone: '998 ' + phoneValue,
+        centerName: formData.get('center-name'),
+        courseType: formData.get('course-type'),
+        message: formData.get('message'),
+        timestamp: new Date().toISOString()
+      };
+
+      try {
+        if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL') {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          showToast(successMessage);
+          (form as HTMLFormElement).reset();
+        } else {
+          await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          showToast(successMessage);
+          (form as HTMLFormElement).reset();
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showToast(errorMessage);
+      } finally {
+        submitText?.classList.remove('hidden');
+        submitSpinner?.classList.add('hidden');
+      }
+    });
+  }
+
+  initContactForm();
+  document.addEventListener('astro:after-swap', initContactForm);
+</script>

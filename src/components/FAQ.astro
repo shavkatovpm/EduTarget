@@ -1,0 +1,146 @@
+---
+const faqs = [
+  {
+    question: 'Minimal reklama byudjeti qancha?',
+    answer: 'Reklama uchun minimal byudjet 300$/oy bo\'lishi kerak. Lekin boshlanishiga test uchun 100$ dan boshlashimiz mumkin. Byudjet ta\'lim markazingiz hajmi va maqsadiga qarab belgilanadi.'
+  },
+  {
+    question: 'Qancha vaqtda natija ko\'raman?',
+    answer: 'Odatda birinchi murojaatlar 1-2 hafta ichida keladi. Barqaror o\'quvchilar oqimi uchun 2-3 oy kerak bo\'ladi. Natija kurs turi va auditoriyaga bog\'liq.'
+  },
+  {
+    question: 'Qaysi platforma yaxshiroq — Telegram yoki Instagram?',
+    answer: 'Bu kurs turiga bog\'liq. Masalan, IT kurslar uchun Telegram samaraliroq, bolalar kurslari uchun Instagram yaxshi ishlaydi. Biz tahlil qilib, sizga eng mos platformani tavsiya qilamiz.'
+  },
+  {
+    question: 'Faqat ta\'lim markazlari bilan ishlaysizlarmi?',
+    answer: 'Ha, biz faqat ta\'lim sohasiga ixtisoslashganmiz — ta\'lim markazlari, onlayn kurslar, repetitorlar. Shu sohani chuqur tushunamiz va eng yaxshi natijalarni beramiz.'
+  },
+  {
+    question: 'Nimadan boshlaymiz?',
+    answer: 'Avval bepul maslahat suhbatini o\'tkazamiz. Ta\'lim markazingiz haqida tanishamiz, tahlil qilamiz va strategiya taklif etamiz. Kelishsak — ishni boshlaymiz.'
+  }
+];
+---
+
+<section class="section-padding min-h-screen flex flex-col justify-center">
+  <div class="container-custom">
+    <div class="mx-auto max-w-3xl text-center">
+      <h2 class="text-3xl font-bold text-dark md:text-4xl">
+        Ko'p beriladigan savollar
+      </h2>
+    </div>
+
+    <div class="mx-auto mt-12 max-w-3xl">
+      <div class="space-y-4" data-faq-container>
+        {faqs.map((faq) => (
+          <div
+            class="faq-item rounded-2xl border border-dark/10 bg-white"
+            data-faq-item
+          >
+            <button
+              type="button"
+              class="flex w-full items-center justify-between gap-4 p-6 text-left"
+              data-faq-trigger
+              aria-expanded="false"
+            >
+              <span class="text-lg font-medium text-dark">
+                {faq.question}
+              </span>
+              <svg
+                class="faq-icon h-5 w-5 shrink-0 text-accent"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </button>
+            <div class="faq-answer" data-faq-answer>
+              <p class="px-6 pb-6 text-dark/60">
+                {faq.answer}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq-item {
+    transition: border-color 0.25s ease;
+    will-change: border-color;
+  }
+
+  .faq-item.is-open {
+    border-color: rgba(97, 197, 255, 0.2);
+  }
+
+  .faq-icon {
+    transition: transform 0.25s ease;
+    will-change: transform;
+  }
+
+  .faq-item.is-open .faq-icon {
+    transform: rotate(45deg);
+  }
+
+  .faq-answer {
+    height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: height 0.25s ease, opacity 0.2s ease;
+    will-change: height, opacity;
+  }
+
+  .faq-item.is-open .faq-answer {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  function initFAQ() {
+    const container = document.querySelector('[data-faq-container]');
+    if (!container) return;
+
+    const items = container.querySelectorAll('[data-faq-item]');
+
+    items.forEach((item) => {
+      const trigger = item.querySelector('[data-faq-trigger]');
+      const answer = item.querySelector('[data-faq-answer]') as HTMLElement;
+      if (!trigger || !answer) return;
+
+      const content = answer.firstElementChild as HTMLElement;
+
+      trigger.addEventListener('click', () => {
+        const isOpen = item.classList.contains('is-open');
+
+        items.forEach((otherItem) => {
+          const otherAnswer = otherItem.querySelector('[data-faq-answer]') as HTMLElement;
+          const otherTrigger = otherItem.querySelector('[data-faq-trigger]');
+          if (otherItem !== item && otherItem.classList.contains('is-open')) {
+            otherItem.classList.remove('is-open');
+            if (otherAnswer) otherAnswer.style.height = '0';
+            if (otherTrigger) otherTrigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+
+        if (isOpen) {
+          item.classList.remove('is-open');
+          answer.style.height = '0';
+          trigger.setAttribute('aria-expanded', 'false');
+        } else {
+          item.classList.add('is-open');
+          answer.style.height = content.offsetHeight + 'px';
+          trigger.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+  }
+
+  initFAQ();
+  document.addEventListener('astro:after-swap', initFAQ);
+</script>
