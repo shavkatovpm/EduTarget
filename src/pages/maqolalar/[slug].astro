@@ -1,0 +1,409 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+
+const formattedDate = new Date(post.data.date).toLocaleDateString('uz-UZ', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const updatedDate = post.data.updatedDate
+  ? new Date(post.data.updatedDate).toLocaleDateString('uz-UZ', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  : null;
+
+// Schema.org
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.date,
+  dateModified: post.data.updatedDate || post.data.date,
+  author: { '@type': 'Organization', name: post.data.author, url: Astro.site?.toString() },
+  publisher: {
+    '@type': 'Organization',
+    name: 'EduTarget',
+    url: Astro.site?.toString(),
+    logo: { '@type': 'ImageObject', url: new URL('/favicon.svg', Astro.site).toString() },
+  },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': new URL(`/maqolalar/${post.id}`, Astro.site).toString() },
+  wordCount: post.data.readingTime * 200,
+  inLanguage: 'uz',
+  keywords: post.data.tags.join(', '),
+};
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Asosiy', item: Astro.site?.toString() },
+    { '@type': 'ListItem', position: 2, name: 'Maqolalar', item: new URL('/maqolalar', Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name: post.data.title, item: new URL(`/maqolalar/${post.id}`, Astro.site).toString() },
+  ],
+};
+
+const faqSchema = post.data.faq
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: post.data.faq.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: { '@type': 'Answer', text: item.answer },
+      })),
+    }
+  : null;
+
+const toc = headings.filter((h) => h.depth === 2);
+
+const allPosts = await getCollection('blog');
+const relatedPosts = allPosts
+  .filter((p) => p.id !== post.id)
+  .filter((p) => p.data.category === post.data.category || p.data.tags.some((t) => post.data.tags.includes(t)))
+  .slice(0, 3);
+---
+
+<BaseLayout
+  title={`${post.data.title} | EduTarget`}
+  description={post.data.description}
+  type="article"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
+
+  <article>
+    <!-- Article Header -->
+    <div class="bg-white border-b border-dark/10">
+      <div class="container-custom py-12 md:py-20">
+        <div class="mx-auto max-w-3xl">
+          <!-- Breadcrumb -->
+          <nav class="mb-8" aria-label="Breadcrumb">
+            <ol class="flex items-center gap-2 text-sm text-dark/40">
+              <li><a href="/" class="hover:text-accent">Asosiy</a></li>
+              <li>/</li>
+              <li><a href="/maqolalar" class="hover:text-accent">Maqolalar</a></li>
+            </ol>
+          </nav>
+
+          <!-- Category badge -->
+          <span class="inline-block rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
+            {post.data.category}
+          </span>
+
+          <!-- Title -->
+          <h1 class="mt-4 text-3xl font-bold leading-tight md:text-4xl lg:text-5xl">
+            {post.data.title}
+          </h1>
+
+          <!-- Description -->
+          <p class="mt-4 text-lg leading-relaxed text-dark/60 md:text-xl">
+            {post.data.description}
+          </p>
+
+          <!-- Meta info -->
+          <div class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-dark/40">
+            <span>{post.data.author}</span>
+            <span class="h-1 w-1 rounded-full bg-dark/20"></span>
+            <time datetime={post.data.date}>{formattedDate}</time>
+            <span class="h-1 w-1 rounded-full bg-dark/20"></span>
+            <span>{post.data.readingTime} daqiqa o'qish</span>
+            {updatedDate && (
+              <>
+                <span class="h-1 w-1 rounded-full bg-dark/20"></span>
+                <span>Yangilangan: {updatedDate}</span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Article Content -->
+    <div class="container-custom py-12 md:py-16">
+      <div class="mx-auto max-w-3xl">
+        <!-- Main content -->
+        <div class="prose-custom">
+          <Content />
+        </div>
+
+        <!-- FAQ Section -->
+        {post.data.faq && post.data.faq.length > 0 && (
+          <div class="mt-16">
+            <h2 class="mb-6 text-2xl font-bold">Tez-tez so'raladigan savollar</h2>
+            <div class="space-y-3" id="article-faq">
+              {post.data.faq.map((item, index) => (
+                <div class="faq-item rounded-xl border border-dark/10 bg-white transition-colors">
+                  <button
+                    class="faq-toggle flex w-full items-center justify-between p-5 text-left"
+                    aria-expanded="false"
+                    data-faq-index={index}
+                  >
+                    <span class="pr-6 font-medium text-dark">{item.question}</span>
+                    <svg class="faq-icon h-5 w-5 shrink-0 text-dark/30 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <div class="faq-content overflow-hidden" style="height: 0;">
+                    <p class="px-5 pb-5 leading-relaxed text-dark/60">{item.answer}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <!-- Tags -->
+        <div class="mt-12 flex flex-wrap items-center gap-2">
+          {post.data.tags.map((tag) => (
+            <span class="rounded-full border border-dark/10 px-3 py-1 text-xs text-dark/40">
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <!-- Share -->
+        <div class="mt-10 flex items-center gap-4 rounded-2xl border border-dark/10 bg-white p-5">
+          <span class="text-sm font-medium text-dark/40">Ulashish:</span>
+          <div class="flex items-center gap-2">
+            <a
+              href={`https://t.me/share/url?url=${encodeURIComponent(new URL(`/maqolalar/${post.id}`, Astro.site).toString())}&text=${encodeURIComponent(post.data.title)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex h-9 items-center gap-2 rounded-lg border border-dark/10 px-3 text-sm text-dark/50 transition-colors hover:border-accent/30 hover:text-accent"
+            >
+              <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+              </svg>
+              Telegram
+            </a>
+            <button
+              id="copy-link-btn"
+              class="flex h-9 items-center gap-2 rounded-lg border border-dark/10 px-3 text-sm text-dark/50 transition-colors hover:border-accent/30 hover:text-accent"
+            >
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.813a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364L4.5 8.25" />
+              </svg>
+              <span id="copy-text">Nusxalash</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Related Posts -->
+        {relatedPosts.length > 0 && (
+          <div class="mt-16">
+            <h2 class="mb-6 text-xl font-bold">O'xshash maqolalar</h2>
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {relatedPosts.map((related) => (
+                <a
+                  href={`/maqolalar/${related.id}`}
+                  class="group rounded-2xl border border-dark/10 bg-white p-5 transition-all hover:border-accent/30 hover:shadow-md hover:shadow-accent/5"
+                >
+                  <span class="text-xs font-medium text-accent">{related.data.category}</span>
+                  <h3 class="mt-2 font-bold leading-snug text-dark transition-colors group-hover:text-accent">
+                    {related.data.title}
+                  </h3>
+                  <p class="mt-2 line-clamp-2 text-sm text-dark/50">
+                    {related.data.description}
+                  </p>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <!-- CTA -->
+        <div class="mt-16 rounded-2xl bg-dark p-8 text-center md:p-12">
+          <h2 class="text-2xl font-bold text-white md:text-3xl">
+            Professional marketing kerakmi?
+          </h2>
+          <p class="mx-auto mt-3 max-w-lg text-white/60">
+            Maqolalardan o'rganish yaxshi, lekin professional jamoa bilan ishlash eng tezkor natija beradi.
+          </p>
+          <a
+            href="/aloqa"
+            class="mt-6 inline-flex h-12 items-center rounded-full bg-accent px-8 text-sm font-semibold text-white transition-all hover:bg-accent/90"
+          >
+            Bepul maslahat olish
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style is:global>
+  @reference "../../styles/global.css";
+
+  /* Hide duplicate H1 */
+  .prose-custom > h1:first-child {
+    @apply hidden;
+  }
+
+  /* Headings */
+  .prose-custom h1 {
+    @apply mb-4 mt-14 text-2xl font-bold text-dark md:text-3xl;
+  }
+  .prose-custom h2 {
+    @apply mb-4 mt-12 text-xl font-bold text-dark md:text-2xl;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(14, 31, 40, 0.1);
+  }
+  .prose-custom h2:first-child,
+  .prose-custom > h1 + h2 {
+    border-top: none;
+    padding-top: 0;
+  }
+  .prose-custom h3 {
+    @apply mb-3 mt-8 text-lg font-bold text-dark;
+  }
+  .prose-custom h4 {
+    @apply mb-2 mt-6 font-bold text-dark;
+  }
+
+  /* Paragraphs */
+  .prose-custom p {
+    @apply mb-5 text-base leading-[1.8] text-dark/70;
+  }
+
+  /* Lists */
+  .prose-custom ul,
+  .prose-custom ol {
+    @apply mb-5 space-y-2 pl-6 text-dark/70;
+  }
+  .prose-custom ul {
+    @apply list-disc;
+  }
+  .prose-custom ol {
+    @apply list-decimal;
+  }
+  .prose-custom li {
+    @apply text-base leading-[1.8];
+  }
+  .prose-custom li > ul,
+  .prose-custom li > ol {
+    @apply mt-2 mb-0;
+  }
+
+  /* Links */
+  .prose-custom a {
+    @apply font-medium text-accent no-underline transition-colors hover:underline;
+  }
+
+  /* Bold */
+  .prose-custom strong {
+    @apply font-semibold text-dark;
+  }
+
+  /* Blockquote */
+  .prose-custom blockquote {
+    @apply my-8 rounded-xl border-l-4 border-accent bg-accent/5 py-4 pl-5 pr-5 not-italic text-dark/70;
+  }
+  .prose-custom blockquote p {
+    @apply mb-0;
+  }
+
+  /* Code */
+  .prose-custom code {
+    @apply rounded-md bg-dark/5 px-1.5 py-0.5 text-[0.875em] font-medium text-dark/80;
+  }
+  .prose-custom pre {
+    @apply my-6 overflow-x-auto rounded-xl bg-dark p-5 text-sm leading-relaxed text-white/90;
+  }
+  .prose-custom pre code {
+    @apply bg-transparent p-0 text-white/90;
+  }
+
+  /* Tables */
+  .prose-custom table {
+    @apply my-6 w-full overflow-hidden rounded-xl border border-dark/10 text-sm;
+  }
+  .prose-custom thead {
+    @apply bg-dark/5;
+  }
+  .prose-custom th {
+    @apply px-4 py-3 text-left font-semibold text-dark;
+  }
+  .prose-custom td {
+    @apply border-t border-dark/10 px-4 py-3 text-dark/70;
+  }
+
+  /* Horizontal Rule */
+  .prose-custom hr {
+    @apply my-12 border-dark/10;
+  }
+
+  /* Images */
+  .prose-custom img {
+    @apply my-8 rounded-xl;
+  }
+</style>
+
+<script>
+  function initArticle() {
+    // FAQ accordion
+    const faqToggles = document.querySelectorAll('.faq-toggle');
+    faqToggles.forEach((toggle) => {
+      toggle.addEventListener('click', () => {
+        const item = toggle.closest('.faq-item');
+        const content = item?.querySelector('.faq-content') as HTMLElement;
+        const icon = toggle.querySelector('.faq-icon');
+        const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+
+        faqToggles.forEach((other) => {
+          if (other !== toggle) {
+            const otherItem = other.closest('.faq-item');
+            const otherContent = otherItem?.querySelector('.faq-content') as HTMLElement;
+            const otherIcon = other.querySelector('.faq-icon');
+            other.setAttribute('aria-expanded', 'false');
+            if (otherContent) otherContent.style.height = '0';
+            if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+          }
+        });
+
+        if (isOpen) {
+          toggle.setAttribute('aria-expanded', 'false');
+          if (content) content.style.height = '0';
+          if (icon) (icon as HTMLElement).style.transform = 'rotate(180deg)';
+          item?.classList.remove('border-accent/20');
+        } else {
+          toggle.setAttribute('aria-expanded', 'true');
+          if (content) content.style.height = content.scrollHeight + 'px';
+          if (icon) (icon as HTMLElement).style.transform = 'rotate(0deg)';
+          item?.classList.add('border-accent/20');
+        }
+      });
+    });
+
+    // Copy link
+    const copyBtn = document.getElementById('copy-link-btn');
+    const copyText = document.getElementById('copy-text');
+    copyBtn?.addEventListener('click', () => {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        if (copyText) {
+          copyText.textContent = 'Nusxalandi!';
+          setTimeout(() => { copyText.textContent = 'Nusxalash'; }, 2000);
+        }
+      });
+    });
+  }
+
+  initArticle();
+  document.addEventListener('astro:after-swap', initArticle);
+</script>

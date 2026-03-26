@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogCard from '../../components/BlogCard.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+
+const categories = [...new Set(posts.map((post) => post.data.category))];
+
+const schemaOrg = {
+  '@context': 'https://schema.org',
+  '@type': 'Blog',
+  name: "EduTarget Blog — Ta'lim markazlari uchun foydali maqolalar",
+  description: "Ta'lim markazlari uchun marketing, reklama va o'quvchi jalb qilish bo'yicha maqolalar",
+  url: new URL('/maqolalar', Astro.site).toString(),
+  publisher: {
+    '@type': 'Organization',
+    name: 'EduTarget',
+    url: Astro.site?.toString(),
+  },
+  blogPost: posts.map((post) => ({
+    '@type': 'BlogPosting',
+    headline: post.data.title,
+    description: post.data.description,
+    datePublished: post.data.date,
+    author: { '@type': 'Organization', name: post.data.author },
+    url: new URL(`/maqolalar/${post.id}`, Astro.site).toString(),
+  })),
+};
+---
+
+<BaseLayout
+  title="Maqolalar — Ta'lim markazlari uchun marketing bo'yicha foydali maqolalar | EduTarget"
+  description="Ta'lim markazlari uchun marketing, reklama, SEO va o'quvchi jalb qilish bo'yicha amaliy maqolalar va qo'llanmalar."
+>
+  <script type="application/ld+json" set:html={JSON.stringify(schemaOrg)} />
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Asosiy', item: Astro.site?.toString() },
+      { '@type': 'ListItem', position: 2, name: 'Maqolalar', item: new URL('/maqolalar', Astro.site).toString() },
+    ],
+  })} />
+
+  <section class="section-padding">
+    <div class="container-custom">
+      <!-- Header -->
+      <div class="mx-auto mb-12 max-w-3xl text-center">
+        <h1 class="text-3xl font-bold md:text-4xl">
+          Foydali maqolalar
+        </h1>
+        <p class="mt-4 text-dark/60">
+          Ta'lim markazlari uchun marketing, reklama va o'quvchi jalb qilish bo'yicha amaliy qo'llanmalar
+        </p>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="mb-10 flex flex-wrap justify-center gap-2" id="category-filter">
+        <button
+          class="category-btn active rounded-full border border-dark/10 px-4 py-2 text-sm font-medium text-dark transition-all"
+          data-category="all"
+        >
+          Hammasi
+        </button>
+        {categories.map((cat) => (
+          <button
+            class="category-btn rounded-full border border-dark/10 px-4 py-2 text-sm font-medium text-dark/50 transition-all hover:border-accent/30 hover:text-accent"
+            data-category={cat}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      <!-- Blog Grid -->
+      <div class="mx-auto grid max-w-5xl gap-6 md:grid-cols-2 lg:grid-cols-3" id="blog-grid">
+        {posts.map((post) => (
+          <div class="blog-item" data-category={post.data.category}>
+            <BlogCard
+              title={post.data.title}
+              description={post.data.description}
+              date={post.data.date}
+              category={post.data.category}
+              readingTime={post.data.readingTime}
+              slug={post.id}
+            />
+          </div>
+        ))}
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden py-20 text-center">
+        <p class="text-lg text-dark/40">Bu kategoriyada hozircha maqola yo'q</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  @reference "../../styles/global.css";
+
+  .category-btn.active {
+    @apply border-accent bg-accent/10 text-accent;
+  }
+
+  .blog-item.hidden-item {
+    display: none;
+  }
+</style>
+
+<script>
+  function initCategoryFilter() {
+    const buttons = document.querySelectorAll('.category-btn');
+    const items = document.querySelectorAll('.blog-item');
+    const emptyState = document.getElementById('empty-state');
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const category = btn.getAttribute('data-category');
+
+        buttons.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        let visibleCount = 0;
+        items.forEach((item) => {
+          const itemCategory = item.getAttribute('data-category');
+          if (category === 'all' || itemCategory === category) {
+            item.classList.remove('hidden-item');
+            visibleCount++;
+          } else {
+            item.classList.add('hidden-item');
+          }
+        });
+
+        if (emptyState) {
+          emptyState.classList.toggle('hidden', visibleCount > 0);
+        }
+      });
+    });
+  }
+
+  initCategoryFilter();
+  document.addEventListener('astro:after-swap', initCategoryFilter);
+</script>
