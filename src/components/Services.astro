@@ -9,16 +9,20 @@ const services = [
   {
     icon: telegramIcon,
     title: 'Telegram Ads',
+    price: '250$',
+    priceNote: 'oyiga, reklama byudjetidan tashqari',
     what: 'Telegram Ads platformasi va mashhur kanallarda maqsadli reklama. Bot orqali o\'quvchi yig\'ish va avtomatik funnel.',
     forWhom: 'Telegram orqali o\'quvchi jalb qilmoqchi bo\'lgan ta\'lim markazlari, kurslar va repetitorlar.',
     result: 'Sifatli obunachilar, to\'g\'ridan-to\'g\'ri murojaatlar va arzon lead narxi.'
   },
   {
     icon: googleIcon,
-    title: 'Google Ads & SEO',
-    what: 'Google qidiruvida reklama (Search, Display) va organik SEO optimizatsiya. Saytingizni Google\'da birinchi sahifaga chiqaramiz.',
-    forWhom: 'Google orqali o\'quvchi qidirayotgan ta\'lim markazlari. "Ingliz tili kursi" kabi so\'rovlarda topilmoqchi bo\'lganlar.',
-    result: 'Issiq auditoriyadan murojaatlar, yuqori konversiya va uzoq muddatli organik trafik.'
+    title: 'Google SEO',
+    price: '400$',
+    priceNote: 'oyiga, uzoq muddatli investitsiya',
+    what: 'Saytingizni Google qidiruvida birinchi sahifaga chiqaramiz. Texnik SEO, Local SEO, kalit so\'zlar va kontent optimizatsiya.',
+    forWhom: 'Google\'da "ingliz tili kursi", "IT kurs Toshkent" kabi so\'rovlarda topilmoqchi bo\'lgan ta\'lim biznesi.',
+    result: 'Issiq, organik auditoriyadan murojaatlar. Bir marta chiqqan natija — yillab bepul trafik.'
   }
 ];
 ---
@@ -55,9 +59,15 @@ const services = [
                   <svg class="h-6 w-6 text-accent" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" set:html={service.icon} />
                 </div>
                 <div class="flex-1 min-w-0">
-                  <h3 class="text-lg font-bold text-dark mb-2">
-                    {service.title}
-                  </h3>
+                  <div class="mb-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                    <h3 class="text-lg font-bold text-dark">
+                      {service.title}
+                    </h3>
+                    <span class="inline-flex items-baseline gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent">
+                      <span class="font-bold">{service.price}</span>
+                      <span class="text-[10px] font-medium text-accent/80">/oy dan</span>
+                    </span>
+                  </div>
                   <p class="text-sm text-dark/70 leading-relaxed">{service.what}</p>
                 </div>
               </div>
@@ -123,11 +133,20 @@ const services = [
             <div class="absolute inset-0 bg-accent opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-5"></div>
 
             <div class="relative flex flex-1 flex-col">
-              <div class="mb-5 flex items-center gap-3">
-                <div class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent/10">
-                  <svg class="h-6 w-6 text-accent" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" set:html={service.icon} />
+              <div class="mb-5 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent/10">
+                    <svg class="h-6 w-6 text-accent" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" set:html={service.icon} />
+                  </div>
+                  <h3 class="text-xl font-bold text-dark">{service.title}</h3>
                 </div>
-                <h3 class="text-xl font-bold text-dark">{service.title}</h3>
+                <div class="text-right">
+                  <div class="text-xs font-medium text-dark/50">Narxi</div>
+                  <div class="flex items-baseline gap-1">
+                    <span class="text-xl font-bold text-accent">{service.price}</span>
+                    <span class="text-xs font-medium text-dark/70">/oy dan</span>
+                  </div>
+                </div>
               </div>
 
               <div class="flex-1">
