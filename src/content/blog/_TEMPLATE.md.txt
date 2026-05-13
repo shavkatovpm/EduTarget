@@ -1,0 +1,68 @@
+---
+title: "[Primary keyword] — [foydalar/yo'nalish] (50-60 belgi)"
+description: "Aniq foyda + raqam/sana + action verb. 150-160 belgi. Google search natijasida ko'rinadi."
+date: "YYYY-MM-DD"
+updatedDate: "YYYY-MM-DD"
+author: "EduTarget jamoasi"
+category: "Kurs tanlash"   # CONTENT_GUIDE.md dagi ro'yxatdan tanlang
+tags: ["primary keyword", "ikkinchi", "long-tail", "yo'nalish/shahar"]
+readingTime: 10            # so'z soni / 200
+
+# AEO: 2-4 jumlali to'g'ridan-to'g'ri javob. LLM'lar SHU MATNNI iqtibos qiladi.
+tldr: "Maqola savoliga 2-4 jumlali javob. Konkret raqam/fakt bilan boshlasin. Generic 'biz aytamiz' jumlalar yo'q."
+
+# AEO: Primary keyword (Google Search Console va kontekst uchun)
+targetKeyword: "primary keyword"
+
+# AEO: 3-6 ta tezkor xulosa nuqtalari (Featured Snippet va LLM iqtibos uchun)
+keyTakeaways:
+  - "Konkret action-oriented xulosa #1 (raqam bilan)"
+  - "Xulosa #2"
+  - "Xulosa #3"
+  - "Xulosa #4 (kelajak qadam)"
+
+# CTA: 'darslinker' (kurs qidiruvchi) / 'seo-service' (kurs egasi) / 'both' (universal)
+ctaTarget: darslinker
+
+# E-E-A-T: statistika ishlatsangiz manba beriling
+sources:
+  - title: "Manba nomi"
+    url: "https://example.uz/..."
+
+# AEO va Featured Snippets uchun. 4-6 ta savol-javob.
+faq:
+  - question: "Foydalanuvchi Google'da yozadigan savol"
+    answer: "40-60 so'zli to'g'ridan-to'g'ri javob. Birinchi jumla savolni iyamiy takrorlasin."
+  - question: "Ikkinchi savol"
+    answer: "Javob."
+---
+
+# H1 — Sarlavhani aynan takrorlang yoki primary keyword bilan boshlang
+
+[Birinchi paragraf, 50-80 so'z. Primary keyword bu yerda bo'lsin. Foydalanuvchi sahifaga to'g'ri kelganini his qilsin.]
+
+## H2 — Birinchi katta savol (savol shaklida!)
+
+Birinchi jumla — to'g'ridan-to'g'ri javob (Featured Snippet shu jumlani oladi). Keyin 1-2 paragraf tafsilot.
+
+### H3 — Kichikroq savol/qadam
+
+Ro'yxat, jadval yoki misol.
+
+## H2 — Ikkinchi savol
+
+Davom ettiring.
+
+| Ustun 1 | Ustun 2 | Ustun 3 |
+|---------|---------|---------|
+| Misol   | Misol   | Misol   |
+
+## H2 — Uchinchi savol
+
+...
+
+## Xulosa
+
+Asosiy 2-3 ta nuqtani takrorlang. Keyingi qadam taklif qiling.
+
+[Tabiiy ichki link va tashqi link kamida 2-3 marta matn ichida bo'lsin. Darslinker.uz ni tabiiy yo'l bilan eslang (agar mos bo'lsa).]

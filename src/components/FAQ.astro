@@ -6,22 +6,38 @@ const faqs = [
   },
   {
     question: 'Qancha vaqtda natija ko\'raman?',
-    answer: 'Odatda birinchi murojaatlar 1-2 hafta ichida keladi. Barqaror o\'quvchilar oqimi uchun 2-3 oy kerak bo\'ladi. Natija kurs turi va auditoriyaga bog\'liq.'
+    answer: 'Reklamadan birinchi murojaatlar 1-2 hafta ichida keladi. SEO uchun barqaror natija — 3-6 oy. AEO (ChatGPT, Gemini, Perplexity\'da topda chiqish) uchun — 2-4 oy. Aralash strategiya eng tez natija beradi.'
+  },
+  {
+    question: 'AEO nima va SEO\'dan qanday farqi bor?',
+    answer: 'AEO (Answer Engine Optimization) — saytingizni ChatGPT, Gemini, Perplexity va boshqa AI motorlarida javob sifatida chiqarish. SEO — Google qidiruvi uchun. AEO\'da maqolada TLDR, savollar shaklidagi sarlavhalar va structured data muhim. EduTarget — O\'zbekistonda AEO\'ga ixtisoslashgan birinchi agentliklardan.'
   },
   {
     question: 'Qaysi platforma yaxshiroq — Telegram yoki Google?',
     answer: 'Bu kurs turiga va maqsadga bog\'liq. Telegram Ads — tezkor natija va arzon leadlar uchun ideal. Google Ads va SEO — "kurs qidiryapti" degan issiq auditoriya uchun eng samarali. Ko\'pincha ikkalasini birga ishlatish eng yaxshi natija beradi.'
   },
   {
-    question: 'Faqat ta\'lim markazlari bilan ishlaysizlarmi?',
-    answer: 'Ha, biz faqat ta\'lim sohasiga ixtisoslashganmiz — ta\'lim markazlari, onlayn kurslar, repetitorlar. Shu sohani chuqur tushunamiz va eng yaxshi natijalarni beramiz.'
+    question: 'Kimlar bilan ishlaysizlar — faqat ta\'lim markazlarimi?',
+    answer: 'Biz butun ta\'lim sohasiga ixtisoslashganmiz: ta\'lim markazlari, onlayn kurslar, repetitorlar, maktablar, universitetlar va edtech platformalar. Ta\'lim biznesining xususiyatlarini chuqur tushunamiz.'
   },
   {
     question: 'Nimadan boshlaymiz?',
-    answer: 'Avval bepul maslahat suhbatini o\'tkazamiz. Ta\'lim markazingiz haqida tanishamiz, tahlil qilamiz va strategiya taklif etamiz. Kelishsak — ishni boshlaymiz.'
+    answer: 'Avval bepul maslahat suhbatini o\'tkazamiz. Ta\'lim biznesingiz haqida tanishamiz, raqobat tahlilini qilamiz va strategiya taklif etamiz. Kelishsak — ishni boshlaymiz.'
   }
 ];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.question,
+    acceptedAnswer: { '@type': 'Answer', text: f.answer },
+  })),
+};
 ---
+
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
 
 <section class="section-padding min-h-screen flex flex-col justify-center">
   <div class="container-custom">
@@ -58,7 +74,7 @@ const faqs = [
               </svg>
             </button>
             <div class="faq-answer" data-faq-answer>
-              <p class="px-6 pb-6 text-dark/60">
+              <p class="px-6 pb-6 text-dark/70">
                 {faq.answer}
               </p>
             </div>

@@ -27,15 +27,20 @@ const updatedDate = post.data.updatedDate
     })
   : null;
 
-// Schema.org
+// Schema.org — BlogPosting (Google's recommended for blog articles) + speakable for AEO/voice
 const articleSchema = {
   '@context': 'https://schema.org',
-  '@type': 'Article',
+  '@type': 'BlogPosting',
   headline: post.data.title,
   description: post.data.description,
+  abstract: post.data.tldr || post.data.description,
   datePublished: post.data.date,
   dateModified: post.data.updatedDate || post.data.date,
-  author: { '@type': 'Organization', name: post.data.author, url: Astro.site?.toString() },
+  author: {
+    '@type': 'Organization',
+    name: post.data.author,
+    url: Astro.site?.toString(),
+  },
   publisher: {
     '@type': 'Organization',
     name: 'EduTarget',
@@ -46,7 +51,32 @@ const articleSchema = {
   wordCount: post.data.readingTime * 200,
   inLanguage: 'uz',
   keywords: post.data.tags.join(', '),
+  about: post.data.targetKeyword,
+  // AEO: speakable section helps voice assistants (Google Assistant, Siri) and signals
+  // to LLM scrapers which part of the page is the canonical answer.
+  speakable: {
+    '@type': 'SpeakableSpecification',
+    cssSelector: ['[data-speakable="tldr"]', '[data-speakable="takeaways"]'],
+  },
+  ...(post.data.sources && post.data.sources.length > 0 && {
+    citation: post.data.sources.map((s) => ({ '@type': 'CreativeWork', name: s.title, url: s.url })),
+  }),
 };
+
+// AEO: HowTo schema if the post is a step-by-step guide
+const howToSchema = post.data.howTo
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'HowTo',
+      name: post.data.howTo.name,
+      step: post.data.howTo.steps.map((step, i) => ({
+        '@type': 'HowToStep',
+        position: i + 1,
+        name: step.name,
+        text: step.text,
+      })),
+    }
+  : null;
 
 const breadcrumbSchema = {
   '@context': 'https://schema.org',
@@ -86,6 +116,7 @@ const relatedPosts = allPosts
 >
   <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  {howToSchema && <script type="application/ld+json" set:html={JSON.stringify(howToSchema)} />}
   {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
 
   <article>
@@ -113,7 +144,7 @@ const relatedPosts = allPosts
           </h1>
 
           <!-- Description -->
-          <p class="mt-4 text-lg leading-relaxed text-dark/60 md:text-xl">
+          <p class="mt-4 text-lg leading-relaxed text-dark/70 md:text-xl">
             {post.data.description}
           </p>
 
@@ -138,6 +169,45 @@ const relatedPosts = allPosts
     <!-- Article Content -->
     <div class="container-custom py-12 md:py-16">
       <div class="mx-auto max-w-3xl">
+
+        <!-- TLDR / Quick Answer (AEO: this is what LLMs and Featured Snippets pull) -->
+        {post.data.tldr && (
+          <aside
+            class="mb-10 rounded-2xl border-l-4 border-accent bg-accent/5 p-5 md:p-6"
+            data-speakable="tldr"
+            aria-label="Qisqacha javob"
+          >
+            <div class="mb-2 flex items-center gap-2">
+              <svg class="h-4 w-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-xs font-bold uppercase tracking-wider text-accent">Qisqacha</span>
+            </div>
+            <p class="text-base leading-relaxed text-dark md:text-lg">{post.data.tldr}</p>
+          </aside>
+        )}
+
+        <!-- Key Takeaways (AEO: bullet-list summary LLMs love to cite verbatim) -->
+        {post.data.keyTakeaways && post.data.keyTakeaways.length > 0 && (
+          <aside
+            class="mb-10 rounded-2xl border border-dark/10 bg-white p-5 md:p-6"
+            data-speakable="takeaways"
+            aria-label="Asosiy xulosalar"
+          >
+            <h2 class="mb-4 text-base font-bold text-dark">Asosiy xulosalar</h2>
+            <ul class="space-y-2.5">
+              {post.data.keyTakeaways.map((point) => (
+                <li class="flex items-start gap-2.5 text-sm leading-relaxed text-dark/80 md:text-base">
+                  <svg class="mt-1 h-4 w-4 shrink-0 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        )}
+
         <!-- Main content -->
         <div class="prose-custom">
           <Content />
@@ -161,7 +231,7 @@ const relatedPosts = allPosts
                     </svg>
                   </button>
                   <div class="faq-content overflow-hidden" style="height: 0;">
-                    <p class="px-5 pb-5 leading-relaxed text-dark/60">{item.answer}</p>
+                    <p class="px-5 pb-5 leading-relaxed text-dark/70">{item.answer}</p>
                   </div>
                 </div>
               ))}
@@ -228,21 +298,65 @@ const relatedPosts = allPosts
           </div>
         )}
 
-        <!-- CTA -->
-        <div class="mt-16 rounded-2xl bg-dark p-8 text-center md:p-12">
-          <h2 class="text-2xl font-bold text-white md:text-3xl">
-            Professional marketing kerakmi?
-          </h2>
-          <p class="mx-auto mt-3 max-w-lg text-white/60">
-            Maqolalardan o'rganish yaxshi, lekin professional jamoa bilan ishlash eng tezkor natija beradi.
-          </p>
-          <a
-            href="/aloqa"
-            class="mt-6 inline-flex h-12 items-center rounded-full bg-accent px-8 text-sm font-semibold text-white transition-all hover:bg-accent/90"
-          >
-            Bepul maslahat olish
-          </a>
-        </div>
+        <!-- CTA: dynamic based on post's ctaTarget -->
+        {post.data.ctaTarget === 'darslinker' ? (
+          <div class="mt-16 rounded-2xl bg-dark p-8 text-center md:p-12">
+            <h2 class="text-2xl font-bold text-white md:text-3xl">
+              O'zingizga mos kursni toping
+            </h2>
+            <p class="mx-auto mt-3 max-w-xl text-white/70">
+              Darslinker.uz — O'zbekistondagi minglab kurslar, repetitorlar va onlayn platformalar bitta katalogda. Filtr bilan o'zingizga mos variantni 1 daqiqada toping.
+            </p>
+            <a
+              href="https://darslinker.uz"
+              target="_blank"
+              rel="noopener"
+              class="mt-6 inline-flex h-12 items-center rounded-full bg-accent px-8 text-sm font-semibold text-white transition-all hover:bg-accent/90"
+            >
+              Darslinker.uz da kurs topish
+            </a>
+          </div>
+        ) : post.data.ctaTarget === 'both' ? (
+          <div class="mt-16 grid gap-4 md:grid-cols-2">
+            <div class="rounded-2xl bg-dark p-7 md:p-8">
+              <h3 class="text-xl font-bold text-white">Kurs izlayapsizmi?</h3>
+              <p class="mt-2 text-sm text-white/70">Darslinker.uz da minglab kurslar va repetitorlar — filtr bilan tanlang.</p>
+              <a
+                href="https://darslinker.uz"
+                target="_blank"
+                rel="noopener"
+                class="mt-5 inline-flex h-11 items-center rounded-full bg-accent px-6 text-sm font-semibold text-white hover:bg-accent/90"
+              >
+                Kurs topish
+              </a>
+            </div>
+            <div class="rounded-2xl border-2 border-accent bg-white p-7 md:p-8">
+              <h3 class="text-xl font-bold text-dark">Kurs egasi/o'qituvchi siz bo'lsangiz</h3>
+              <p class="mt-2 text-sm text-dark/70">Saytingiz va kurslaringizni Google'da topda chiqaramiz. SEO + AEO xizmati.</p>
+              <a
+                href="/aloqa"
+                class="mt-5 inline-flex h-11 items-center rounded-full bg-dark px-6 text-sm font-semibold text-white hover:bg-dark/90"
+              >
+                Bepul maslahat
+              </a>
+            </div>
+          </div>
+        ) : (
+          <div class="mt-16 rounded-2xl bg-dark p-8 text-center md:p-12">
+            <h2 class="text-2xl font-bold text-white md:text-3xl">
+              Saytingizni Google'da topda chiqaramiz
+            </h2>
+            <p class="mx-auto mt-3 max-w-lg text-white/70">
+              Maqolalardan o'rganish yaxshi, lekin SEO + AEO professional jamoa bilan tezroq natija beradi. Ta'lim biznesiga ixtisoslashganmiz.
+            </p>
+            <a
+              href="/aloqa"
+              class="mt-6 inline-flex h-12 items-center rounded-full bg-accent px-8 text-sm font-semibold text-white transition-all hover:bg-accent/90"
+            >
+              Bepul SEO audit olish
+            </a>
+          </div>
+        )}
       </div>
     </div>
   </article>

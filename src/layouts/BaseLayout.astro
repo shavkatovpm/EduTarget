@@ -13,8 +13,8 @@ interface Props {
 }
 
 const {
-  title = "EduTarget — Ta'lim markazlari uchun marketing agentligi",
-  description = "Ta'lim markazlari uchun maqsadli marketing. Telegram Ads va Google Ads & SEO orqali o'quvchilar oqimini oshiramiz.",
+  title = "EduTarget — Ta'lim biznesi uchun SEO, AEO va marketing agentligi",
+  description = "Ta'lim markazlari, kurslar, maktablar va edtech platformalar uchun ixtisoslashgan agentlik. SEO, AEO (ChatGPT/Gemini'da topda chiqish), Telegram Ads va Google Ads.",
   image,
   type = 'website',
   noindex = false
@@ -31,13 +31,26 @@ const {
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- Fonts -->
+    <!-- Fonts: non-blocking load (preload + async stylesheet) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
+      rel="preload"
+      as="style"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
-      rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      />
+    </noscript>
 
     <!-- SEO Component -->
     <SEO

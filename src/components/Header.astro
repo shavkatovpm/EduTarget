@@ -48,7 +48,7 @@ const currentPath = Astro.url.pathname;
               'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href.replace('/#', '/')))
                 ? 'text-dark'
-                : 'text-dark/60 hover:bg-dark/5 hover:text-dark'
+                : 'text-dark/70 hover:bg-dark/5 hover:text-dark'
             ]}
           >
             {item.name}
